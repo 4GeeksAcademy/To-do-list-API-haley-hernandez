@@ -7,6 +7,12 @@ const Home = () => {
 	const [inputValue, setInputValue] = useState("");
 	const username = "haleymarieh";
 
+	useEffect(() => {
+		getTasks()
+	}, []);
+
+
+
 	const getTasks = () => {
 		fetch('https://playground.4geeks.com/todo/users/haleymarieh', {
 			method: 'GET',
@@ -22,7 +28,8 @@ const Home = () => {
 			// here i am taking the json data and updating the tasks in the app
 			.then(data => {
 				// setting the tasks state to the todos array from the API or an empty array if i have no tasks
-				setTasks(data.todos || []);
+				setTasks(data.todos);
+				console.log(tasks)
 			})
 			// logging the error if anyhting goes wrong
 			.catch(error => console.error('Error fetching tasks:', error));
@@ -41,8 +48,13 @@ const Home = () => {
 			}
 		})
 			.then(response => response.json())
-			.then(result => console.log(result))
+			.then((result) => {
+				console.log(result);
+				setInputValue(""); // Move setInputValue inside the callback
+				getTasks();
+			})
 			.catch(error => console.log(error))
+
 	}
 
 
@@ -66,7 +78,7 @@ const Home = () => {
 	// this is a function to delete a specifc task form the API using its ID
 	const deleteTask = (id) => {
 		// i am sending a request to the API to delete the task with the given ID
-		fetch(`https://playground.4geeks.com/todo/todos/ ${id}`, {
+		fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
 			// i am using the delete method to tell the server to remove the task
 			method: 'DELETE',
 			// i am telling the server we're working with JSON data (even though im not sending anything)
@@ -74,6 +86,7 @@ const Home = () => {
 				'Content-Type': 'application/json'
 			}
 		})
+		setTasks(tasks.filter((t, currentIndex)=> t.id != id)) //ask geogr why settasks isnt highlighting properly
 	}
 
 	// this is a function that deletes all the tasks
@@ -117,7 +130,7 @@ const Home = () => {
 				) : (
 					tasks.map((task) => (
 						<li key={task.id}>
-							{task.text}
+							{task.label}
 							<button
 								className="delete-btn"
 								onClick={() => deleteTask(task.id)}
